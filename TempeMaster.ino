@@ -27,7 +27,7 @@ unsigned long lastReadTime1 = 0;
 // ---------------------------------------------------------
 const char* thingspeak_api_key = "0NNDZJ5SIJBV8GGY";
 unsigned long lastThingSpeakTime = 0;
-const unsigned long thingspeakInterval = 20000; // Enviar cada 20 segundos
+const unsigned long thingspeakInterval = 15000; // Enviar cada 15 segundos (límite de ThingSpeak gratuito)
 
 // Servidor web local de respaldo
 WebServer server(80);
@@ -55,9 +55,13 @@ void sendToThingSpeak() {
     http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS); // Seguir redirecciones si ThingSpeak devuelve 302
     
     int httpCode = http.GET();
+    String responseBody = http.getString();
     
     if (httpCode > 0) {
-      Serial.printf("ThingSpeak Respondió: %d\n", httpCode);
+      Serial.printf("ThingSpeak Respondió: %d, Cuerpo: %s\n", httpCode, responseBody.c_str());
+      if (responseBody == "0") {
+        Serial.println("  -> ¡Atención! ThingSpeak devolvió 0. Esto significa que los datos NO se guardaron. Puede ser por el límite de 15s o una API Key incorrecta.");
+      }
     } else {
       Serial.printf("Error en ThingSpeak: %s\n", http.errorToString(httpCode).c_str());
     }
@@ -83,7 +87,7 @@ void handleRoot() {
     html += "<div class='data'>Temperatura: " + String(current_t1, 1) + " °C</div>";
     html += "<div class='data hum'>Humedad: " + String(current_h1, 1) + " %</div>";
   }
-  html += "<p style='color:#10b981; margin-top:30px;'>✔ Subiendo datos a ThingSpeak cada 20s...</p>";
+  html += "<p style='color:#10b981; margin-top:30px;'>✔ Subiendo datos a ThingSpeak cada 15s...</p>";
   html += "<p style='color:#94a3b8; font-size:0.9rem;'>Para ver el panel global, abre el archivo dashboard.html</p>";
   html += "<script>setTimeout(function(){ location.reload(); }, 5000);</script>";
   html += "</body></html>";
