@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TempeMaster - Dashboard Global</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b1120;
+            --glass-bg: rgba(30, 41, 59, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-temp: #f87171;
+            --accent-hum: #60a5fa;
+            --accent-glow: rgba(56, 189, 248, 0.15);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(96, 165, 250, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(248, 113, 113, 0.08), transparent 25%);
+            color: var(--text-main);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .dashboard-container {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 1rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3rem;
+            margin: 0;
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 30px var(--accent-glow);
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .pulse {
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.03), transparent);
+            transform: skewX(-25deg);
+            transition: 0.5s;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+        }
+
+        .glass-card:hover::before {
+            left: 150%;
+            transition: 0.7s;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 1rem;
+        }
+
+        .card-icon {
+            font-size: 1.8rem;
+        }
+
+        .card-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 0;
+            color: #e2e8f0;
+        }
+
+        .metrics {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+        }
+
+        .metric-label {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .metric-value-container {
+            display: flex;
+            align-items: baseline;
+            gap: 0.2rem;
+        }
+
+        .metric-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .metric-unit {
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .temp .metric-value {
+            color: var(--accent-temp);
+            text-shadow: 0 0 20px rgba(248, 113, 113, 0.3);
+        }
+
+        .hum .metric-value {
+            color: var(--accent-hum);
+            text-shadow: 0 0 20px rgba(96, 165, 250, 0.3);
+        }
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 2rem;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top-color: #38bdf8;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            h1 { font-size: 2.2rem; }
+            .glass-card { padding: 1.5rem; }
+            .metric-value { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <header>
+            <h1>TempeMaster</h1>
+            <div class="subtitle">Monitoreo Global de Sensores vía ThingSpeak</div>
+            <div class="status-badge" id="connection-status">
+                <span class="loader" id="loader"></span>
+                <span class="pulse" id="pulse" style="display: none;"></span>
+                <span id="status-text">Conectando...</span>
+            </div>
+        </header>
+
+        <div class="grid">
+            <!-- Cómputo 3 -->
+            <div class="glass-card">
+                <div class="card-header">
+                    <span class="card-icon">📍</span>
+                    <h2 class="card-title">Cómputo 3</h2>
+                </div>
+                <div class="metrics">
+                    <div class="metric-row temp">
+                        <div class="metric-label">🌡️ Temperatura</div>
+                        <div class="metric-value-container">
+                            <span class="metric-value" id="t1">--</span>
+                            <span class="metric-unit">°C</span>
+                        </div>
+                    </div>
+                    <div class="metric-row hum">
+                        <div class="metric-label">💧 Humedad</div>
+                        <div class="metric-value-container">
+                            <span class="metric-value" id="h1">--</span>
+                            <span class="metric-unit">%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            Última actualización de ThingSpeak: <span id="last-update">Buscando datos...</span>
+        </footer>
+    </div>
+
+    <script>
+        const READ_API_KEY = 'N2X42AWEZDHZ5HXG';
+        const CHANNEL_ID = '3361734';
+
+        async function fetchSensorData() {
+            try {
+                // Se genera la URL dentro de la función y se le añade la fecha actual para evitar el caché del navegador/Service Worker
+                const URL = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${READ_API_KEY}&results=1&_t=${new Date().getTime()}`;
+                
+                const response = await fetch(URL, { cache: "no-store" });
+                if (!response.ok) throw new Error('Error en la respuesta de la red');
+                
+                const data = await response.json();
+                
+                if (data.feeds && data.feeds.length > 0) {
+                    const latest = data.feeds[0];
+                    
+                    // Actualizar valores en el DOM
+                    // field1: Temp Local, field2: Hum Local
+                    document.getElementById('t1').innerText = latest.field1 ? parseFloat(latest.field1).toFixed(1) : '--';
+                    document.getElementById('h1').innerText = latest.field2 ? parseFloat(latest.field2).toFixed(1) : '--';
+                    
+                    // Actualizar fecha
+                    const date = new Date(latest.created_at);
+                    document.getElementById('last-update').innerText = date.toLocaleString('es-ES');
+
+                    // Cambiar estado a conectado
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('pulse').style.display = 'block';
+                    document.getElementById('status-text').innerText = 'En línea - Datos recibidos';
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('pulse').style.display = 'block';
+                document.getElementById('pulse').style.backgroundColor = '#ef4444';
+                document.getElementById('pulse').style.boxShadow = '0 0 10px #ef4444';
+                document.getElementById('status-text').innerText = 'Error de conexión';
+                document.getElementById('status-text').style.color = '#ef4444';
+                document.getElementById('connection-status').style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                document.getElementById('connection-status').style.borderColor = 'rgba(239, 68, 68, 0.2)';
+            }
+        }
+
+        // Ejecutar inmediatamente
+        fetchSensorData();
+
+        // Actualizar cada 20 segundos
+        setInterval(fetchSensorData, 20000);
+    </script>
+</body>
+</html>
