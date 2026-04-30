@@ -287,6 +287,30 @@
                     </div>
                 </div>
             </div>
+
+            <!-- MakerSpace -->
+            <div class="glass-card">
+                <div class="card-header">
+                    <span class="card-icon">🛠️</span>
+                    <h2 class="card-title">MakerSpace</h2>
+                </div>
+                <div class="metrics">
+                    <div class="metric-row temp">
+                        <div class="metric-label">🌡️ Temperatura</div>
+                        <div class="metric-value-container">
+                            <span class="metric-value" id="t2">--</span>
+                            <span class="metric-unit">°C</span>
+                        </div>
+                    </div>
+                    <div class="metric-row hum">
+                        <div class="metric-label">💧 Humedad</div>
+                        <div class="metric-value-container">
+                            <span class="metric-value" id="h2">--</span>
+                            <span class="metric-unit">%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <footer>
@@ -300,8 +324,8 @@
 
         async function fetchSensorData() {
             try {
-                // Se genera la URL dentro de la función y se le añade la fecha actual para evitar el caché del navegador/Service Worker
-                const URL = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${READ_API_KEY}&results=1&_t=${new Date().getTime()}`;
+                // Traemos los últimos 5 resultados para evitar que los campos nulos sobreescriban los datos
+                const URL = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${READ_API_KEY}&results=5&_t=${new Date().getTime()}`;
                 
                 const response = await fetch(URL, { cache: "no-store" });
                 if (!response.ok) throw new Error('Error en la respuesta de la red');
@@ -309,16 +333,34 @@
                 const data = await response.json();
                 
                 if (data.feeds && data.feeds.length > 0) {
-                    const latest = data.feeds[0];
+                    let latestT1 = '--', latestH1 = '--', latestT2 = '--', latestH2 = '--';
+                    let latestDate = null;
+                    
+                    // Recorremos desde el más reciente al más antiguo para encontrar el último valor no nulo
+                    for (let i = data.feeds.length - 1; i >= 0; i--) {
+                        const feed = data.feeds[i];
+                        if (latestDate === null) latestDate = feed.created_at;
+                        
+                        // Cómputo 3 (Field 1 y 2)
+                        if (latestT1 === '--' && feed.field1 !== null) latestT1 = parseFloat(feed.field1).toFixed(1);
+                        if (latestH1 === '--' && feed.field2 !== null) latestH1 = parseFloat(feed.field2).toFixed(1);
+                        
+                        // MakerSpace (Field 3 y 4)
+                        if (latestT2 === '--' && feed.field3 !== null) latestT2 = parseFloat(feed.field3).toFixed(1);
+                        if (latestH2 === '--' && feed.field4 !== null) latestH2 = parseFloat(feed.field4).toFixed(1);
+                    }
                     
                     // Actualizar valores en el DOM
-                    // field1: Temp Local, field2: Hum Local
-                    document.getElementById('t1').innerText = latest.field1 ? parseFloat(latest.field1).toFixed(1) : '--';
-                    document.getElementById('h1').innerText = latest.field2 ? parseFloat(latest.field2).toFixed(1) : '--';
+                    document.getElementById('t1').innerText = latestT1;
+                    document.getElementById('h1').innerText = latestH1;
+                    document.getElementById('t2').innerText = latestT2;
+                    document.getElementById('h2').innerText = latestH2;
                     
                     // Actualizar fecha
-                    const date = new Date(latest.created_at);
-                    document.getElementById('last-update').innerText = date.toLocaleString('es-ES');
+                    if (latestDate) {
+                        const date = new Date(latestDate);
+                        document.getElementById('last-update').innerText = date.toLocaleString('es-ES');
+                    }
 
                     // Cambiar estado a conectado
                     document.getElementById('loader').style.display = 'none';
