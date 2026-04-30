@@ -342,12 +342,12 @@
                         if (latestDate === null) latestDate = feed.created_at;
                         
                         // Cómputo 3 (Field 1 y 2)
-                        if (latestT1 === '--' && feed.field1 !== null) latestT1 = parseFloat(feed.field1).toFixed(1);
-                        if (latestH1 === '--' && feed.field2 !== null) latestH1 = parseFloat(feed.field2).toFixed(1);
+                        if (latestT1 === '--' && feed.field1 != null && feed.field1 !== '') latestT1 = parseFloat(feed.field1).toFixed(1);
+                        if (latestH1 === '--' && feed.field2 != null && feed.field2 !== '') latestH1 = parseFloat(feed.field2).toFixed(1);
                         
                         // MakerSpace (Field 3 y 4)
-                        if (latestT2 === '--' && feed.field3 !== null) latestT2 = parseFloat(feed.field3).toFixed(1);
-                        if (latestH2 === '--' && feed.field4 !== null) latestH2 = parseFloat(feed.field4).toFixed(1);
+                        if (latestT2 === '--' && feed.field3 != null && feed.field3 !== '') latestT2 = parseFloat(feed.field3).toFixed(1);
+                        if (latestH2 === '--' && feed.field4 != null && feed.field4 !== '') latestH2 = parseFloat(feed.field4).toFixed(1);
                     }
                     
                     // Actualizar valores en el DOM
